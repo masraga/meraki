@@ -1,16 +1,19 @@
 package pkg
 
-import "github.com/masraga/meraki/pkg/driver"
+import (
+	"github.com/masraga/meraki/pkg/driver"
+)
 
 type Autolaod struct {
 	Config *Config
 }
 
 func (auto *Autolaod) Database() *driver.MongodbDriver {
-	return driver.NewMongodbDriver(auto.Config.DbUri, auto.Config.DbName)
+	return driver.NewMongodbdriver(auto.Config.DbUri, auto.Config.DbName)
 }
 
-func NewAutoload(config Config) *Autolaod {
+func NewAutoload() *Autolaod {
+	config := *NewConfig("./")
 	return &Autolaod{
 		Config: &config,
 	}

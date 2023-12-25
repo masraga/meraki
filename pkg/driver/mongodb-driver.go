@@ -3,6 +3,7 @@ package driver
 import (
 	"context"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -10,34 +11,39 @@ import (
 type MongoClient struct {
 	Uri    string
 	DbName string
-	Db     *mongo.Database
 }
 
-func (mc *MongoClient) CreateClient() {
+func (mc *MongoClient) GetDatabase() *mongo.Database {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mc.Uri))
 	if err != nil {
 		panic(err)
 	}
 
-	defer func() {
-		if err := client.Disconnect(context.TODO()); err != nil {
-			panic(err)
-		}
-	}()
+	err = client.Ping(context.TODO(), nil)
 
-	mc.Db = client.Database(mc.DbName)
+	if err != nil {
+		panic(err)
+	}
+
+	return client.Database(mc.DbName)
 }
 
 type MongodbDriver struct {
-	Client *MongoClient
+	Database *mongo.Database
 }
 
 func (m *MongodbDriver) Collection(collName string) *mongo.Collection {
-	return m.Client.Db.Collection(collName)
+	return m.Database.Collection(collName)
 }
 
-func NewMongodbDriver(Uri string, DbName string) *MongodbDriver {
+func (m *MongodbDriver) ObjectID(id string) primitive.ObjectID {
+	objId, _ := primitive.ObjectIDFromHex(id)
+	return objId
+}
+
+func NewMongodbdriver(DbUri string, DbName string) *MongodbDriver {
+	client := MongoClient{DbName: DbName, Uri: DbUri}
 	return &MongodbDriver{
-		Client: &MongoClient{Uri: Uri, DbName: DbName},
+		Database: client.GetDatabase(),
 	}
 }
