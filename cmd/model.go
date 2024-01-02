@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/masraga/meraki/pkg"
 	"github.com/spf13/cobra"
 )
 
@@ -17,9 +18,11 @@ var modelCmd = &cobra.Command{
 	Short: "creating database model",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		autoload := pkg.NewAutoload()
+
 		var modelScript, repoScript []string
 		modelName, _ := cmd.Flags().GetString("name")
-		modelFileName := fmt.Sprintf("./models/%s.go", modelName)
+		modelFileName := fmt.Sprintf("./models/%s", autoload.FilenameFormatHelper(modelName, "go"))
 
 		//START: STRUCT CODE
 		modelScript = append(modelScript, "package models \n\n")
@@ -52,7 +55,7 @@ var modelCmd = &cobra.Command{
 		fmt.Println(`model created in:`, modelFileName)
 
 		// ================================================================================================
-		repoFileName := fmt.Sprintf("./repositories/%s.go", modelName)
+		repoFileName := fmt.Sprintf("./repositories/%s", autoload.FilenameFormatHelper(modelName, "go"))
 
 		// START: CREATE REPO SCRIPT
 		repoScript = append(repoScript, "package repositories\n\n")
