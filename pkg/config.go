@@ -5,8 +5,11 @@ import (
 )
 
 type Config struct {
-	DbName string `mapstructure:"DB_NAME"`
-	DbUri  string `mapstructure:"DB_URI"`
+	DbName   string `mapstructure:"DB_NAME"`
+	DbUri    string `mapstructure:"DB_URI"`
+	DbDriver string `mapstructur:"DB_DRIVER"`
+
+	SystemPort string `mapstructure:"SYSTEM_PORT"`
 }
 
 func NewConfig(path string) (config *Config) {
