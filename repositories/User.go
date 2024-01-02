@@ -5,8 +5,8 @@ import (
 
 	"github.com/masraga/meraki/models"
 	"github.com/masraga/meraki/pkg"
+	app "github.com/masraga/meraki/pkg/app"
 	driver "github.com/masraga/meraki/pkg/driver"
-	repositories "github.com/masraga/meraki/pkg/repositories"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,7 +14,7 @@ import (
 
 type User struct {
 	Db    *driver.MongodbDriver
-	Repo  *repositories.MongoRepository
+	Repo  *app.MongoRepository
 	Model *models.User
 }
 
@@ -79,8 +79,9 @@ func (r *User) Aggregate(filter bson.D) (*mongo.Cursor, error) {
 
 func NewUser() *User {
 	var model *models.User
-	repo := repositories.NewMongoRepository("User")
-	db := pkg.NewAutoload().Database()
+	autoload := pkg.NewAutoload()
+	db := autoload.Database()
+	repo := autoload.MongoRepository("User")
 	return &User{
 		Db:    db,
 		Repo:  repo,

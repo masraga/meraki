@@ -1,9 +1,8 @@
-package system
+package app
 
 import (
 	"context"
 
-	"github.com/masraga/meraki/pkg"
 	driver "github.com/masraga/meraki/pkg/driver"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -72,12 +71,4 @@ func (r *MongoRepository) Aggregate(filter bson.D) (*mongo.Cursor, error) {
 	}
 
 	return cursor, nil
-}
-
-func NewMongoRepository(CollName string) *MongoRepository {
-	db := pkg.NewAutoload().Database()
-	return &MongoRepository{
-		CollName: CollName,
-		Db:       db,
-	}
 }
