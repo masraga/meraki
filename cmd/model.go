@@ -62,7 +62,7 @@ var modelCmd = &cobra.Command{
 		repoScript = append(repoScript, "\t\"github.com/masraga/meraki/models\"\n")
 		repoScript = append(repoScript, "\t\"github.com/masraga/meraki/pkg\"\n")
 		repoScript = append(repoScript, "\tdriver \"github.com/masraga/meraki/pkg/driver\"\n")
-		repoScript = append(repoScript, "\tsystem \"github.com/masraga/meraki/pkg/system\"\n")
+		repoScript = append(repoScript, "\trepositories \"github.com/masraga/meraki/pkg/repositories\"\n")
 		repoScript = append(repoScript, "\t\"go.mongodb.org/mongo-driver/bson\"\n")
 		repoScript = append(repoScript, "\t\"go.mongodb.org/mongo-driver/bson/primitive\"\n")
 		repoScript = append(repoScript, "\t\"go.mongodb.org/mongo-driver/mongo\"\n")
@@ -70,7 +70,7 @@ var modelCmd = &cobra.Command{
 
 		repoScript = append(repoScript, fmt.Sprintf("type %s struct {\n", modelName))
 		repoScript = append(repoScript, "\tDb *driver.MongodbDriver\n")
-		repoScript = append(repoScript, "\tRepo *system.MongoRepository\n")
+		repoScript = append(repoScript, "\tRepo *repositories.MongoRepository\n")
 		repoScript = append(repoScript, fmt.Sprintf("\tModel *models.%s\n", modelName))
 		repoScript = append(repoScript, "}\n\n")
 
@@ -141,7 +141,7 @@ var modelCmd = &cobra.Command{
 		//FUNC NewUser
 		repoScript = append(repoScript, fmt.Sprintf("func New%s() *%s {\n", modelName, modelName))
 		repoScript = append(repoScript, fmt.Sprintf("\tvar model *models.%s\n", modelName))
-		repoScript = append(repoScript, fmt.Sprintf("\trepo := system.NewMongoRepository(\"%s\")\n", modelName))
+		repoScript = append(repoScript, fmt.Sprintf("\trepo := repositories.NewMongoRepository(\"%s\")\n", modelName))
 		repoScript = append(repoScript, "\tdb := pkg.NewAutoload().Database()\n")
 		repoScript = append(repoScript, fmt.Sprintf("\treturn &%s{\n", modelName))
 		repoScript = append(repoScript, "\t\tDb: db,\n")
