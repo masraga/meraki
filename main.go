@@ -9,9 +9,4 @@ import (
 
 func main() {
 	cmd.Execute()
-	// config := pkg.NewConfig("./")
-
-	// router := gin.Default()
-	// routes.Api(router)
-	// router.Run(fmt.Sprintf(":%s", config.SystemPort))
 }
