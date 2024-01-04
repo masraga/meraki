@@ -10,6 +10,7 @@ type Config struct {
 	DbDriver string `mapstructur:"DB_DRIVER"`
 
 	SystemPort string `mapstructure:"SYSTEM_PORT"`
+	JwtSecret  string `mapstructure:"JWT_SECRET"`
 }
 
 func NewConfig(path string) (config *Config) {

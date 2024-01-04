@@ -34,6 +34,10 @@ func (auto *Autoload) FilenameFormatHelper(file string, extension string) string
 	return helpers.FilenameFormatHelper(file, extension)
 }
 
+func (auto *Autoload) JwtHelper() *helpers.JwtHelper {
+	return helpers.NewJwtHelper(auto.Config.JwtSecret)
+}
+
 func NewAutoload() *Autoload {
 	config := *NewConfig("./")
 	return &Autoload{
