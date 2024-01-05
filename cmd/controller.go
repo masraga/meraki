@@ -39,7 +39,11 @@ var controllerCmd = &cobra.Command{
 		ctlScript = append(ctlScript, "*/\n")
 		ctlScript = append(ctlScript, fmt.Sprintf("func (c *%s) Index(ctx *gin.Context) {\n", ctlName))
 		ctlScript = append(ctlScript, fmt.Sprintf("\tfmt.Print(\"index method is called in controller %s\")\n", ctlName))
-		ctlScript = append(ctlScript, "}\n")
+		ctlScript = append(ctlScript, "}\n\n")
+
+		ctlScript = append(ctlScript, fmt.Sprintf("func New%s() *%s {\n", ctlName, ctlName))
+		ctlScript = append(ctlScript, fmt.Sprintf("\treturn &%s{}\n", ctlName))
+		ctlScript = append(ctlScript, "}")
 
 		os.WriteFile(ctlFileName, []byte(strings.Join(ctlScript, "")), 0664)
 		fmt.Println(`controller created in:`, ctlFileName)
