@@ -18,4 +18,5 @@ func Api(router *gin.Engine) {
 	})
 
 	api.POST("/users/register", userController.Register)
+	api.POST("/users/login", userController.Login)
 }

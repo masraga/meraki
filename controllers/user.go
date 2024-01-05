@@ -12,6 +12,11 @@ func (c *User) Register(ctx *gin.Context) {
 	register.Save()
 }
 
+func (c *User) Login(ctx *gin.Context) {
+	login := userauth.NewLogin(ctx)
+	login.Run()
+}
+
 func NewUser() *User {
 	return &User{}
 }

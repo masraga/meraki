@@ -18,7 +18,8 @@ type User struct {
 	/*
 		fill your collection field below
 	*/
-	Username string `bson:"username"`
-	Password string `bson:"password"`
-	Name     string `bson:"name"`
+	Username    string `bson:"username"`
+	Password    string `bson:"password"`
+	Name        string `bson:"name"`
+	AccessToken string `bson:"accessToken"`
 }
