@@ -3,11 +3,13 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/masraga/meraki/controllers"
+	"github.com/masraga/meraki/middlewares"
 )
 
 func Api(router *gin.Engine) {
 
 	userController := controllers.NewUser()
+	welcomeController := controllers.NewWelcome()
 
 	api := router.Group("/api")
 
@@ -19,4 +21,7 @@ func Api(router *gin.Engine) {
 
 	api.POST("/users/register", userController.Register)
 	api.POST("/users/login", userController.Login)
+
+	apiAuth := api.Use(middlewares.VerifyUserToken)
+	apiAuth.GET("/admin/dashboard", welcomeController.Index)
 }
