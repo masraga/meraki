@@ -52,31 +52,35 @@ func (r *Register) HashPassword() (string, error) {
 }
 
 func (r *Register) SetApiError(statusCode int, message error) {
-	r.Ctx.JSON(http.StatusPreconditionFailed, gin.H{
+	r.Ctx.JSON(statusCode, gin.H{
 		"status":  statusCode,
 		"message": fmt.Sprint(message),
 	})
 }
 
 func (r *Register) Save() error {
+	fmt.Println("[log] validate nil request")
 	err := r.CheckNilRequest()
 	if err != nil {
 		r.SetApiError(http.StatusPreconditionFailed, err)
 		return err
 	}
 
+	fmt.Println("[log] check pass len")
 	err = r.CheckPassLen()
 	if err != nil {
 		r.SetApiError(http.StatusPreconditionFailed, err)
 		return err
 	}
 
+	fmt.Println("[log] check mismatch password")
 	err = r.CheckMisMatchPass()
 	if err != nil {
 		r.SetApiError(http.StatusPreconditionFailed, err)
 		return err
 	}
 
+	fmt.Println("[log] hash password")
 	password, _ := r.HashPassword()
 	r.RequestRegister.Password = password
 	r.UserRepo.Create(models.User{
