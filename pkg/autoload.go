@@ -3,7 +3,7 @@ package pkg
 import (
 	"github.com/masraga/meraki/pkg/app"
 	"github.com/masraga/meraki/pkg/driver"
-	"github.com/masraga/meraki/pkg/helpers"
+	"github.com/masraga/meraki/pkg/utils"
 )
 
 type Autoload struct {
@@ -31,11 +31,11 @@ func (auto *Autoload) MongoRepository(CollName string) *app.MongoRepository {
 HELPERS
 */
 func (auto *Autoload) FilenameFormatHelper(file string, extension string) string {
-	return helpers.FilenameFormatHelper(file, extension)
+	return utils.FilenameFormatHelper(file, extension)
 }
 
-func (auto *Autoload) JwtHelper() *helpers.JwtHelper {
-	return helpers.NewJwtHelper(auto.Config.JwtSecret)
+func (auto *Autoload) JwtHelper() *utils.JwtHelper {
+	return utils.NewJwtHelper(auto.Config.JwtSecret)
 }
 
 func NewAutoload() *Autoload {
