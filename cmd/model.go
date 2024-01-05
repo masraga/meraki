@@ -4,6 +4,7 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -50,9 +51,6 @@ var modelCmd = &cobra.Command{
 
 		modelScript = append(modelScript, "\n}")
 		//END: STRUCT CODE
-
-		os.WriteFile(modelFileName, []byte(strings.Join(modelScript, "")), 0664)
-		fmt.Println(`model created in:`, modelFileName)
 
 		// ================================================================================================
 		repoFileName := fmt.Sprintf("./repositories/%s", autoload.FilenameFormatHelper(modelName, "go"))
@@ -155,8 +153,15 @@ var modelCmd = &cobra.Command{
 		repoScript = append(repoScript, "}\n\n")
 		// END: CREATE REPO SCRIPT
 
-		os.WriteFile(repoFileName, []byte(strings.Join(repoScript, "")), 0664)
-		fmt.Println(`Repository created in:`, repoFileName)
+		if _, err := os.Stat(modelFileName); errors.Is(err, os.ErrNotExist) {
+			os.WriteFile(modelFileName, []byte(strings.Join(modelScript, "")), 0664)
+			fmt.Println(`model created in:`, modelFileName)
+
+			os.WriteFile(repoFileName, []byte(strings.Join(repoScript, "")), 0664)
+			fmt.Println(`Repository created in:`, repoFileName)
+		} else {
+			panic(fmt.Errorf("[error-log] model %s is exists", modelFileName))
+		}
 	},
 }
 

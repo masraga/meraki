@@ -4,6 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -45,8 +46,12 @@ var controllerCmd = &cobra.Command{
 		ctlScript = append(ctlScript, fmt.Sprintf("\treturn &%s{}\n", ctlName))
 		ctlScript = append(ctlScript, "}")
 
-		os.WriteFile(ctlFileName, []byte(strings.Join(ctlScript, "")), 0664)
-		fmt.Println(`controller created in:`, ctlFileName)
+		if _, err := os.Stat(ctlFileName); errors.Is(err, os.ErrNotExist) {
+			os.WriteFile(ctlFileName, []byte(strings.Join(ctlScript, "")), 0664)
+			fmt.Println(`controller created in:`, ctlFileName)
+		} else {
+			panic(fmt.Errorf("[error-log] controller %s is exists", ctlFileName))
+		}
 	},
 }
 
