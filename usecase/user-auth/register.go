@@ -7,104 +7,101 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/masraga/meraki/models"
 	"github.com/masraga/meraki/repositories"
+	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type RequestRegister struct {
-	Username   string `bson:"username" json:"username"`
-	Password   string `bson:"password" json:"password"`
-	RePassword string `bson:"re-password" json:"re-password"`
-	Name       string `bson:"name" json:"name"`
+type Request struct {
+	Username     string `bson:"username" json:"username"`
+	Password     string `bson:"password" json:"password"`
+	RePassword   string `bson:"re-password" json:"re-password"`
+	Name         string `bson:"name" json:"name"`
+	HashPassword string
 }
 
 type Register struct {
-	Ctx             *gin.Context
-	RequestRegister *RequestRegister
-	MinPassLen      int
-	UserRepo        *repositories.User
+	Ctx        *gin.Context
+	Request    *Request
+	MinPassLen int16
+	UserRepo   *repositories.User
 }
 
-func (r *Register) CheckNilRequest() error {
-	if r.RequestRegister == nil {
-		return fmt.Errorf("not found request")
-	}
-
-	return nil
+func (r *Register) SetApiErr(statusCode int, message string) {
+	r.Ctx.JSON(statusCode, gin.H{
+		"code":    statusCode,
+		"message": message,
+	})
 }
 
-func (r *Register) CheckPassLen() error {
-	if len(r.RequestRegister.Password) < r.MinPassLen {
-		return fmt.Errorf(fmt.Sprintf("min password length is %d", r.MinPassLen))
-	}
-	return nil
+func (r *Register) IsReq() bool {
+	return r.Request != nil
 }
 
-func (r *Register) CheckMisMatchPass() error {
-	if r.RequestRegister.Password != r.RequestRegister.RePassword {
-		return fmt.Errorf("password & retype password is not match")
-	}
-	return nil
+func (r *Register) IsLessPassword() bool {
+	return len(r.Request.Password) < int(r.MinPassLen)
+}
+
+func (r *Register) IsSamePass() bool {
+	return r.Request.Password == r.Request.RePassword
 }
 
 func (r *Register) HashPassword() (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(r.RequestRegister.Password), 14)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(r.Request.Password), 14)
 	return string(bytes), err
 }
 
-func (r *Register) SetApiError(statusCode int, message error) {
-	r.Ctx.JSON(statusCode, gin.H{
-		"status":  statusCode,
-		"message": fmt.Sprint(message),
+func (r *Register) AddUser() (*mongo.InsertOneResult, error) {
+	return r.UserRepo.Create(models.User{
+		Username: r.Request.Username,
+		Password: r.Request.HashPassword,
+		Name:     r.Request.Name,
 	})
 }
 
-func (r *Register) Save() error {
-	fmt.Println("[log] validate nil request")
-	err := r.CheckNilRequest()
-	if err != nil {
-		r.SetApiError(http.StatusPreconditionFailed, err)
-		return err
+func (r *Register) Save() {
+	if !r.IsReq() {
+		r.SetApiErr(http.StatusPreconditionFailed, "request not found")
+		return
+	}
+	if r.IsLessPassword() {
+		r.SetApiErr(http.StatusPreconditionFailed, fmt.Sprintf("minimun password length is %d", r.MinPassLen))
+		return
+	}
+	if !r.IsSamePass() {
+		r.SetApiErr(http.StatusPreconditionFailed, "password is mismatch")
+		return
 	}
 
-	fmt.Println("[log] check pass len")
-	err = r.CheckPassLen()
+	hashPassword, err := r.HashPassword()
 	if err != nil {
-		r.SetApiError(http.StatusPreconditionFailed, err)
-		return err
+		r.SetApiErr(http.StatusInternalServerError, "error hashing password")
+		return
 	}
+	r.Request.HashPassword = hashPassword
 
-	fmt.Println("[log] check mismatch password")
-	err = r.CheckMisMatchPass()
+	_, err = r.AddUser()
 	if err != nil {
-		r.SetApiError(http.StatusPreconditionFailed, err)
-		return err
+		r.SetApiErr(http.StatusInternalServerError, "error save data to db")
 	}
-
-	fmt.Println("[log] hash password")
-	password, _ := r.HashPassword()
-	r.RequestRegister.Password = password
-	r.UserRepo.Create(models.User{
-		Username: r.RequestRegister.Username,
-		Name:     r.RequestRegister.Name,
-		Password: r.RequestRegister.Password,
-	})
 
 	r.Ctx.JSON(http.StatusOK, gin.H{
-		"status":  http.StatusOK,
+		"code":    http.StatusOK,
 		"message": "new user created successfully",
 	})
-	return nil
-
 }
 
 func NewRegister(ctx *gin.Context) *Register {
-	var reqRegister *RequestRegister
-	ctx.ShouldBindJSON(&reqRegister)
+	var (
+		request *Request
+	)
+
+	ctx.ShouldBindJSON(&request)
 	userRepo := repositories.NewUser()
+
 	return &Register{
-		Ctx:             ctx,
-		RequestRegister: reqRegister,
-		MinPassLen:      8,
-		UserRepo:        userRepo,
+		Ctx:        ctx,
+		Request:    request,
+		MinPassLen: 8,
+		UserRepo:   userRepo,
 	}
 }
