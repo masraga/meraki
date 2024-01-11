@@ -14,9 +14,7 @@ type Config struct {
 }
 
 func NewConfig(path string) (config *Config) {
-	viper.AddConfigPath(path)
-	viper.SetConfigName("app")
-	viper.SetConfigType("env")
+	viper.SetConfigFile(path)
 
 	err := viper.ReadInConfig()
 	if err != nil {
