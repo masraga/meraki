@@ -10,7 +10,7 @@ import (
 )
 
 func LoadConfig() *pkg.Autoload {
-	config := pkg.NewConfig("../../") //get app.env path
+	config := pkg.NewConfig("../../.env") //get app.env path
 	return &pkg.Autoload{Config: config}
 }
 

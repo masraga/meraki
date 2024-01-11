@@ -39,7 +39,7 @@ func (auto *Autoload) JwtHelper() *utils.JwtHelper {
 }
 
 func NewAutoload() *Autoload {
-	config := *NewConfig("./")
+	config := *NewConfig("./.env")
 	return &Autoload{
 		Config: &config,
 	}
