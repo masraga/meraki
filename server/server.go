@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	config := pkg.NewConfig("./")
+	config := pkg.NewConfig("./.env")
 
 	gin.SetMode(gin.DebugMode)
 	router := gin.New()
