@@ -2,7 +2,7 @@
 ---
 
 ### About Meraki
-Meraki is boilerplate for build awesome restful API with golang. Meraki use [gin-gonic](https://github.com/gin-gonic/gin) as core system. With default authentication handler, and command-line syntax for write code such as model, repositories, and controller, will help developer to focus build business logic and save time to deliver an application.
+Meraki is a mini framework with [gin-gonic](https://github.com/gin-gonic/gin) as core system. Meraki give a lot convenience for build RESTful api with [gin-gonic](https://github.com/gin-gonic/gin) and [MongoDB](https://www.mongodb.com/), cause meraki have a macro which is will be help developer to build model, repository and controller without write it manually, developer just need to specify name of a model or controller in command-line, then meraki will help to write default method and function automatically. 
 
 ### Meraki Capabilities
 - create automatic model, repository and controller
