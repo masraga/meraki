@@ -4,23 +4,30 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"github.com/masraga/meraki/pkg"
 	"github.com/masraga/meraki/repositories"
 )
 
-func VerifyUserToken(ctx *gin.Context) {
-	token := ctx.GetHeader("Authorization")
-	jwt := pkg.NewAutoload().JwtHelper()
-	dToken, err := jwt.DecodeToken(token)
+func VerifyUserToken(ctx *fiber.Ctx) error {
+	autoload := pkg.NewAutoload()
+	headers := ctx.GetReqHeaders()
+	if len(headers["Authorization"]) == 0 {
+		return ctx.Status(http.StatusPreconditionFailed).JSON(fiber.Map{
+			"statusCode": http.StatusPreconditionFailed,
+			"message":    "unauthorized",
+		})
+	}
+	token := headers["Authorization"][0]
+	dToken, err := autoload.JwtHelper().DecodeToken(token)
 
 	/*
 		validation token input
 	*/
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"statusCode": http.StatusUnauthorized,
-			"message":    "invalid token",
+		return ctx.Status(http.StatusPreconditionFailed).JSON(fiber.Map{
+			"statusCode": http.StatusPreconditionFailed,
+			"message":    "unauthorized",
 		})
 	}
 
@@ -29,15 +36,15 @@ func VerifyUserToken(ctx *gin.Context) {
 	*/
 	expiredTime, err := dToken.GetExpirationTime()
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"statusCode": http.StatusUnauthorized,
+		return ctx.Status(http.StatusPreconditionFailed).JSON(fiber.Map{
+			"statusCode": http.StatusPreconditionFailed,
 			"message":    "error parse expired time",
 		})
 	}
 
 	if time.Now().Unix() > expiredTime.Unix() {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"statusCode": http.StatusUnauthorized,
+		return ctx.Status(http.StatusPreconditionFailed).JSON(fiber.Map{
+			"statusCode": http.StatusPreconditionFailed,
 			"message":    "token is expired",
 		})
 	}
@@ -48,18 +55,18 @@ func VerifyUserToken(ctx *gin.Context) {
 	userRepo := repositories.NewUser()
 	userId, err := dToken.GetIssuer()
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"statusCode": http.StatusUnauthorized,
+		return ctx.Status(http.StatusPreconditionFailed).JSON(fiber.Map{
+			"statusCode": http.StatusPreconditionFailed,
 			"message":    "user not found",
 		})
 	}
 	_, err = userRepo.FindById(userId)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"statusCode": http.StatusUnauthorized,
+		return ctx.Status(http.StatusPreconditionFailed).JSON(fiber.Map{
+			"statusCode": http.StatusPreconditionFailed,
 			"message":    "user not found",
 		})
 	}
 
-	ctx.Next()
+	return ctx.Next()
 }

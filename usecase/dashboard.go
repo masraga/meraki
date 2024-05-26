@@ -3,21 +3,21 @@ package usecase
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 )
 
 type Dashboard struct {
-	Ctx *gin.Context
+	Ctx *fiber.Ctx
 }
 
 func (d *Dashboard) Index() {
-	d.Ctx.JSON(http.StatusOK, gin.H{
+	d.Ctx.Status(http.StatusOK).JSON(fiber.Map{
 		"statusCode": http.StatusOK,
 		"message":    "welcome to dashboard with authentication",
 	})
 }
 
-func NewDashboard(ctx *gin.Context) *Dashboard {
+func NewDashboard(ctx *fiber.Ctx) *Dashboard {
 	return &Dashboard{
 		Ctx: ctx,
 	}

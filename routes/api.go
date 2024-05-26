@@ -1,12 +1,12 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"github.com/masraga/meraki/controllers"
 	"github.com/masraga/meraki/middlewares"
 )
 
-func Api(router *gin.Engine) {
+func Api(router *fiber.App) {
 	/*
 		define all controller here
 	*/
@@ -17,17 +17,18 @@ func Api(router *gin.Engine) {
 		add public api with `api` keyword
 	*/
 	api := router.Group("/api")
-	api.GET("/users/hello-world", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "hello world",
+	api.Get("/users/hello-world", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"message": "your're very cool",
+			"status":  200,
 		})
 	})
-	api.POST("/users/register", userController.Register)
-	api.POST("/users/login", userController.Login)
+	api.Post("/users/register", userController.Register)
+	api.Post("/users/login", userController.Login)
 
-	/*
-		add private api with `apiAuth` keyword
-	*/
+	// /*
+	// 	add private api with `apiAuth` keyword
+	// */
 	apiAuth := api.Use(middlewares.VerifyUserToken)
-	apiAuth.GET("/admin/dashboard", welcomeController.Index)
+	apiAuth.Get("/admin/dashboard", welcomeController.Index)
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"github.com/masraga/meraki/models"
 	"github.com/masraga/meraki/repositories"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -20,15 +20,15 @@ type Request struct {
 }
 
 type Register struct {
-	Ctx        *gin.Context
+	Ctx        *fiber.Ctx
 	Request    *Request
 	MinPassLen int16
 	UserRepo   *repositories.User
 }
 
 func (r *Register) SetApiErr(statusCode int, message string) {
-	r.Ctx.JSON(statusCode, gin.H{
-		"code":    statusCode,
+	r.Ctx.Status(statusCode).JSON(fiber.Map{
+		"status":  statusCode,
 		"message": message,
 	})
 }
@@ -84,18 +84,18 @@ func (r *Register) Save() {
 		r.SetApiErr(http.StatusInternalServerError, "error save data to db")
 	}
 
-	r.Ctx.JSON(http.StatusOK, gin.H{
+	r.Ctx.Status(http.StatusOK).JSON(fiber.Map{
 		"code":    http.StatusOK,
 		"message": "new user created successfully",
 	})
 }
 
-func NewRegister(ctx *gin.Context) *Register {
+func NewRegister(ctx *fiber.Ctx) *Register {
 	var (
 		request *Request
 	)
 
-	ctx.ShouldBindJSON(&request)
+	ctx.BodyParser(&request)
 	userRepo := repositories.NewUser()
 
 	return &Register{

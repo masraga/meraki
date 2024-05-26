@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"github.com/masraga/meraki/models"
 	"github.com/masraga/meraki/pkg"
 	"github.com/masraga/meraki/repositories"
@@ -30,7 +30,7 @@ type LoginRequset struct {
 }
 
 type Login struct {
-	Ctx                 *gin.Context
+	Ctx                 *fiber.Ctx
 	UserRepo            *repositories.User
 	LoginRequest        *LoginRequset
 	Autoload            *pkg.Autoload
@@ -38,7 +38,7 @@ type Login struct {
 }
 
 func (l *Login) SetApiError(statusCode int, message error) {
-	l.Ctx.JSON(statusCode, gin.H{
+	l.Ctx.Status(statusCode).JSON(fiber.Map{
 		"status":  statusCode,
 		"message": fmt.Sprint(message),
 	})
@@ -119,16 +119,16 @@ func (l *Login) Run() error {
 		},
 	}
 
-	l.Ctx.JSON(http.StatusOK, response)
+	l.Ctx.Status(http.StatusOK).JSON(response)
 
 	return nil
 }
 
-func NewLogin(ctx *gin.Context) *Login {
+func NewLogin(ctx *fiber.Ctx) *Login {
 	autoload := pkg.NewAutoload()
 	userRepo := repositories.NewUser()
 	var loginRequest *LoginRequset
-	ctx.ShouldBindJSON(&loginRequest)
+	ctx.BodyParser(&loginRequest)
 	return &Login{
 		Ctx:                 ctx,
 		UserRepo:            userRepo,

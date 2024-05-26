@@ -3,16 +3,19 @@ package main
 import (
 	"fmt"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"github.com/masraga/meraki/pkg"
 	"github.com/masraga/meraki/routes"
 )
 
 func main() {
-	config := pkg.NewConfig("./.env")
+	env := pkg.NewConfig("./.env")
 
-	gin.SetMode(gin.DebugMode)
-	router := gin.New()
-	routes.Api(router)
-	router.Run(fmt.Sprintf(":%s", config.SystemPort))
+	app := fiber.New()
+	app.Get("/api/ping", func(c *fiber.Ctx) error {
+		return c.Status(200).SendString("PONG")
+	})
+
+	routes.Api(app)
+	app.Listen(fmt.Sprintf(":%s", env.SystemPort))
 }
